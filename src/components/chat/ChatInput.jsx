@@ -48,35 +48,58 @@ export const ChatInput = ({ onAdd }) => {
   };
 
   return (
-    <footer style={{ display: 'flex', flexDirection: 'row' }}>
-      <input
+    <footer
+      style={{
+        display: 'flex',
+        flexDirection: 'row',
+        width: '100%',
+        position: 'absolute',
+        bottom: 10,
+        left: 0,
+        height: 50,
+        justifyContent: 'center',
+      }}
+    >
+      <div
         style={{
-          fontSize: 20,
-          width: '100%',
-          margin: 5,
-          padding: 5,
+          height: 50,
+          display: 'flex',
+          flexDirection: 'row',
+          boxShadow: '2px 2px 5px 0px #284035',
           borderRadius: 15,
+          paddingLeft: 9,
         }}
-        value={text}
-        onKeyPress={(key) => {
-          // console.log({ key });
-          if (key.code === 'Enter') {
-            onAdd(text);
-            setText('');
-          }
-        }}
-        onChange={(v) => {
-          setText(v.target.value);
-        }}
-      ></input>
-      <ChatMic
-        onMouseDown={() => {
-          recognition.start();
-        }}
-        onMouseUp={() => {
-          recognition.stop();
-        }}
-      />
+      >
+        <input
+          style={{
+            fontSize: 20,
+            width: '100%',
+            margin: 5,
+            padding: 5,
+            // marginLeft: 25,
+          }}
+          value={text}
+          onKeyPress={(key) => {
+            // console.log({ key });
+            if (key.code === 'Enter') {
+              onAdd(text);
+              setText('');
+            }
+          }}
+          onChange={(v) => {
+            setText(v.target.value);
+          }}
+        ></input>
+        <ChatMic
+          style={{ marginLeft: -50 }}
+          onMouseDown={() => {
+            recognition.start();
+          }}
+          onMouseUp={() => {
+            recognition.stop();
+          }}
+        />
+      </div>
     </footer>
   );
 };

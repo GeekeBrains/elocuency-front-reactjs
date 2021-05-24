@@ -7,12 +7,8 @@ export const ChatMsgs = ({ msgs, voiceSpanish, voiceEnglish }) => (
       width: '100%',
       display: 'flex',
       flexDirection: 'column',
-      backgroundImage: 'url("/images/background1.jpg")',
-      // backgroundSize: 'cover',
-      backgroundSize: 'contain',
-      backgroundRepeat: 'repeat',
       height: 'fit-content',
-      minHeight: '90vh',
+      overflowY: 'auto',
     }}
   >
     {msgs.map((msg, index) => {

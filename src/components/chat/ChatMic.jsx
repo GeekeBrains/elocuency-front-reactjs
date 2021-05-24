@@ -1,11 +1,18 @@
 import { useState } from 'react';
 
-export const ChatMic = ({ onMouseDown, onMouseUp }) => {
+export const ChatMic = ({ onMouseDown, onMouseUp, style }) => {
   const [color, setColor] = useState('black');
 
   return (
     <svg
-      height={45}
+      style={{
+        height: 25,
+        /* margin-bottom: -15px; */
+        position: 'relative',
+        bottom: -11,
+        right: 35,
+      }}
+      height={35}
       xmlns="http://www.w3.org/2000/svg"
       xmlnsXlink="http://www.w3.org/1999/xlink"
       version="1.1"

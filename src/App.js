@@ -6,7 +6,7 @@ import { ChatMsgs } from './components/chat/ChatMsgs';
 import { ChatInput } from 'components/chat/ChatInput';
 import { apiPost } from './libs/ApiCall';
 
-function App() {
+export function App() {
   const [msgs, setMsgs] = useState([]);
   const [voiceSpanish, setVoiceSpanish] = useState([]);
   const [voiceEnglish, setVoiceEnglish] = useState([]);
@@ -54,56 +54,47 @@ function App() {
   // Render ------------------------------------
   return (
     <>
-      <header style={{ height: 25, textAlign: 'center', fontSize: 20, fontWeight: 700 }}>
-        Elocuency
-      </header>
-      <div style={{ display: 'flex', height: '90vh;', overflowY: 'auto' }}>
-        <ChatMsgs msgs={msgs} voiceSpanish={voiceSpanish} voiceEnglish={voiceEnglish} />
-      </div>
-      <footer>
-        <ChatInput
-          onAdd={async (text, speechRecognitionResults) => {
-            const resp = await apiPost('/users/1/send-msg', {
-              text,
-              userId: 'joshua',
-              speechRecognitionResults,
-            });
-            if (resp.data) {
-              const msgsClone = JSON.parse(JSON.stringify(msgs));
-              msgsClone.push({ text, userId: 'user1' });
-              resp.data.forEach((msgResp) => {
-                console.log({ msgResp });
-                msgsClone.push({ text: msgResp.text, userId: msgResp.userId, chatId: '1' });
-                // Habla ---------------------
-                if (!!!msgResp.voice?.mute) {
-                  let mensaje = new global.SpeechSynthesisUtterance(msgResp.text);
-                  if (msgResp.userId === 'botSpanish') {
-                    mensaje.voice = voiceSpanish;
-                    mensaje.lang = 'es-ES';
-                  } else if (msgResp.userId === 'botEnglish') {
-                    mensaje.voice = voiceEnglish;
-                    mensaje.lang = 'en-GB';
-                  }
-                  console.log(mensaje);
-                  mensaje.rate = msgResp.voice?.rate || 1;
-                  // mensaje.volume = 1;
-                  // mensaje.pitch = 1;
-                  global.speechSynthesis.speak(mensaje);
-                  // mensaje.text = msg;
-                  // mensaje.pitch = 1;
-                  // mensaje.lang = 'en-US';
+      <ChatMsgs msgs={msgs} voiceSpanish={voiceSpanish} voiceEnglish={voiceEnglish} />
+      <ChatInput
+        onAdd={async (text, speechRecognitionResults) => {
+          const resp = await apiPost('/users/1/send-msg', {
+            text,
+            userId: 'joshua',
+            speechRecognitionResults,
+          });
+          if (resp.data) {
+            const msgsClone = JSON.parse(JSON.stringify(msgs));
+            msgsClone.push({ text, userId: 'user1' });
+            resp.data.forEach((msgResp) => {
+              console.log({ msgResp });
+              msgsClone.push({ text: msgResp.text, userId: msgResp.userId, chatId: '1' });
+              // Habla ---------------------
+              if (!!!msgResp.voice?.mute) {
+                let mensaje = new global.SpeechSynthesisUtterance(msgResp.text);
+                if (msgResp.userId === 'botSpanish') {
+                  mensaje.voice = voiceSpanish;
+                  mensaje.lang = 'es-ES';
+                } else if (msgResp.userId === 'botEnglish') {
+                  mensaje.voice = voiceEnglish;
+                  mensaje.lang = 'en-GB';
                 }
+                console.log(mensaje);
+                mensaje.rate = msgResp.voice?.rate || 1;
+                // mensaje.volume = 1;
+                // mensaje.pitch = 1;
+                global.speechSynthesis.speak(mensaje);
+                // mensaje.text = msg;
+                // mensaje.pitch = 1;
+                // mensaje.lang = 'en-US';
+              }
 
-                var element = global.document.getElementById('chatView');
-                element.scrollTop = element.scrollHeight;
-              });
-              setMsgs(msgsClone);
-            }
-          }}
-        />
-      </footer>
+              var element = global.document.getElementById('chatView');
+              element.scrollTop = element.scrollHeight;
+            });
+            setMsgs(msgsClone);
+          }
+        }}
+      />
     </>
   );
 }
-
-export default App;

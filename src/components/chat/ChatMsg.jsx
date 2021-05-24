@@ -40,6 +40,7 @@ export const ChatMsg = ({ msg, voiceSpanish, voiceEnglish }) => {
         backgroundColor: msg.userId?.substring(0, 3) === 'bot' ? 'white' : '#9be69e',
         margin: 5,
         padding: 5,
+        marginLeft: 24,
       }}
     >
       {msg.text}
