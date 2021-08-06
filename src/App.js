@@ -57,7 +57,7 @@ export function App() {
       <ChatMsgs msgs={msgs} voiceSpanish={voiceSpanish} voiceEnglish={voiceEnglish} />
       <ChatInput
         onAdd={async (text, speechRecognitionResults) => {
-          const resp = await apiPost('/users/1/send-msg', {
+          const resp = await apiPost('/chats/1/msgs', {
             text,
             userId: 'joshua',
             speechRecognitionResults,
