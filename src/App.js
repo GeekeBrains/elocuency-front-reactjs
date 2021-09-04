@@ -59,12 +59,12 @@ export function App() {
         onAdd={async (text, speechRecognitionResults) => {
           const resp = await apiPost('/chats/1/msgs', {
             text,
-            userId: 'joshua',
+            userId: '6118dabe618abe99be528d32',
             speechRecognitionResults,
           });
           if (resp.data) {
             const msgsClone = JSON.parse(JSON.stringify(msgs));
-            msgsClone.push({ text, userId: 'user1' });
+            msgsClone.push({ text, userId: '6118dabe618abe99be528d32' });
             resp.data.forEach((msgResp) => {
               console.log({ msgResp });
               msgsClone.push({ text: msgResp.text, userId: msgResp.userId, chatId: '1' });
