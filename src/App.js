@@ -69,7 +69,7 @@ export function App() {
               console.log({ msgResp });
               msgsClone.push({ text: msgResp.text, userId: msgResp.userId, chatId: '1' });
               // Habla ---------------------
-              if (!!!msgResp.voice?.mute) {
+              if (!msgResp.voice?.mute) {
                 let mensaje = new global.SpeechSynthesisUtterance(msgResp.text);
                 if (msgResp.userId === 'botSpanish') {
                   mensaje.voice = voiceSpanish;
