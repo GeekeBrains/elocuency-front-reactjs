@@ -1,5 +1,5 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import { useEffect, useState } from 'react';
+import { useEffect,  useState } from 'react';
 
 import './App.css';
 import { ChatMsgs } from './components/chat/ChatMsgs';
@@ -31,7 +31,10 @@ export function App() {
         },
       },
     );
+
   }, []);
+  
+  
 
   // Carga voces --------------------------
   if ('onvoiceschanged' in global.speechSynthesis) {
@@ -51,10 +54,15 @@ export function App() {
     };
   }
 
+
   // Render ------------------------------------
   return (
     <>
-      <ChatMsgs msgs={msgs} voiceSpanish={voiceSpanish} voiceEnglish={voiceEnglish} />
+      <ChatMsgs 
+        msgs={msgs} 
+        voiceSpanish={voiceSpanish} 
+        voiceEnglish={voiceEnglish} 
+      />
       <ChatInput
         onAdd={async (text, speechRecognitionResults) => {
           const resp = await apiPost('/chats/1/msgs', {
@@ -87,9 +95,7 @@ export function App() {
                 // mensaje.pitch = 1;
                 // mensaje.lang = 'en-US';
               }
-
-              var element = global.document.getElementById('chatView');
-              element.scrollTop = element.scrollHeight;
+              
             });
             setMsgs(msgsClone);
           }
