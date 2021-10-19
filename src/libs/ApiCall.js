@@ -3,12 +3,12 @@ import Axios from 'axios';
 const URL_BASE = 'http://localhost:3000';
 
 Axios.interceptors.request.use(
-  (config) => {
+  config => {
     // Do something before request is sent
     // console.log(config);
     return config;
   },
-  (error) => {
+  error => {
     // Do something with request error
     return Promise.reject(error);
   },

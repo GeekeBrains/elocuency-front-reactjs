@@ -1,15 +1,16 @@
-import { useState } from 'react';
-import { ChatMic } from './ChatMic';
+import {useState} from 'react';
+import {ChatMic} from './ChatMic';
 
 try {
-  var SpeechRecognition = global.SpeechRecognition || global.webkitSpeechRecognition;
+  var SpeechRecognition =
+    global.SpeechRecognition || global.webkitSpeechRecognition;
   var recognition = new SpeechRecognition();
   console.log('RECOGN', recognition);
 } catch (e) {
   console.error(e);
 }
 
-export const ChatInput = ({ onAdd }) => {
+export const ChatInput = ({onAdd}) => {
   const [text, setText] = useState('');
 
   recognition.onerror = function (event) {
@@ -20,11 +21,15 @@ export const ChatInput = ({ onAdd }) => {
   // recognition.start();
 
   recognition.onstart = function () {
-    console.log('Voice recognition activated. Try speaking into the microphone.');
+    console.log(
+      'Voice recognition activated. Try speaking into the microphone.',
+    );
   };
 
   recognition.onspeechend = function () {
-    console.log('You were quiet for a while so voice recognition turned itself off.');
+    console.log(
+      'You were quiet for a while so voice recognition turned itself off.',
+    );
   };
 
   recognition.onresult = function (event) {
@@ -38,7 +43,10 @@ export const ChatInput = ({ onAdd }) => {
     // var transcript = event.results[current][0].transcript;
 
     // setText(event.results[current][0].transcript);
-    console.log('speech', { text: event.results[current][0].transcript, res: event.results });
+    console.log('speech', {
+      text: event.results[current][0].transcript,
+      res: event.results,
+    });
     onAdd(event.results[current][0].transcript, event.results);
     setText('');
 
@@ -48,58 +56,45 @@ export const ChatInput = ({ onAdd }) => {
   };
 
   return (
-    <footer
+    <div
       style={{
+        height: 50,
         display: 'flex',
         flexDirection: 'row',
-        width: '100%',
-        position: 'absolute',
-        bottom: 10,
-        left: 0,
-        height: 50,
-        justifyContent: 'center',
+        boxShadow: '2px 2px 5px 0px #284035',
+        borderRadius: 15,
+        paddingLeft: 9,
       }}
     >
-      <div
+      <input
         style={{
-          height: 50,
-          display: 'flex',
-          flexDirection: 'row',
-          boxShadow: '2px 2px 5px 0px #284035',
-          borderRadius: 15,
-          paddingLeft: 9,
+          fontSize: 20,
+          width: '100%',
+          margin: 5,
+          padding: 5,
+          // marginLeft: 25,
         }}
-      >
-        <input
-          style={{
-            fontSize: 20,
-            width: '100%',
-            margin: 5,
-            padding: 5,
-            // marginLeft: 25,
-          }}
-          value={text}
-          onKeyPress={(key) => {
-            // console.log({ key });
-            if (key.code === 'Enter') {
-              onAdd(text);
-              setText('');
-            }
-          }}
-          onChange={(v) => {
-            setText(v.target.value);
-          }}
-        ></input>
-        <ChatMic
-          style={{ marginLeft: -50 }}
-          onMouseDown={() => {
-            recognition.start();
-          }}
-          onMouseUp={() => {
-            recognition.stop();
-          }}
-        />
-      </div>
-    </footer>
+        value={text}
+        onKeyPress={key => {
+          // console.log({ key });
+          if (key.code === 'Enter') {
+            onAdd(text);
+            setText('');
+          }
+        }}
+        onChange={v => {
+          setText(v.target.value);
+        }}
+      ></input>
+      <ChatMic
+        style={{marginLeft: -50}}
+        onMouseDown={() => {
+          recognition.start();
+        }}
+        onMouseUp={() => {
+          recognition.stop();
+        }}
+      />
+    </div>
   );
 };

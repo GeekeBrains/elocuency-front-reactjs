@@ -1,11 +1,17 @@
-import { useEffect, useRef } from 'react';
-import { ChatMsg } from './ChatMsg';
+import {useEffect, useRef} from 'react';
+import {ChatMsg} from './ChatMsg';
+import {ChatMsgPrize} from './ChatMsgPrize';
 
-export const ChatMsgs = ({ ref, msgs, voiceSpanish, voiceEnglish }) => {
+export const ChatMsgs = ({
+  //ref,
+  msgs,
+  voiceSpanish,
+  voiceEnglish,
+}) => {
   const chatMsgsRef = useRef();
 
-  useEffect(()=>{
-    console.log("ref:", chatMsgsRef);
+  useEffect(() => {
+    console.log('ref:', chatMsgsRef);
     const chatView = chatMsgsRef.current; //?.scrollIntoView({ behavior: "smooth" });
     // var chatView = global.document.getElementById('chatView');
     chatView.scrollTop = chatView.scrollHeight - chatView.clientHeight;
@@ -14,7 +20,7 @@ export const ChatMsgs = ({ ref, msgs, voiceSpanish, voiceEnglish }) => {
 
   return (
     <div
-      ref={chatMsgsRef} 
+      ref={chatMsgsRef}
       id="chatView"
       style={{
         width: '100%',
@@ -26,14 +32,20 @@ export const ChatMsgs = ({ ref, msgs, voiceSpanish, voiceEnglish }) => {
     >
       {msgs.map((msg, index) => {
         return (
-          <ChatMsg
-            key={'keyMsg' + index}
-            msg={msg}
-            voiceSpanish={voiceSpanish}
-            voiceEnglish={voiceEnglish}
-          />
+          <>
+            {msg.userId === 'prize' ? (
+              <ChatMsgPrize key={'keyMsgPrize' + index} msg={msg} />
+            ) : (
+              <ChatMsg
+                key={'keyMsg' + index}
+                msg={msg}
+                voiceSpanish={voiceSpanish}
+                voiceEnglish={voiceEnglish}
+              />
+            )}
+          </>
         );
       })}
     </div>
   );
-}
+};
