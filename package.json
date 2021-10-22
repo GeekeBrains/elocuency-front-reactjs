@@ -17,8 +17,11 @@
     "react-gauge-chart": "^0.4.0",
     "react-scripts": "4.0.3",
     "react-tsparticles": "^1.35.4",
+    "react-vis": "^1.11.7",
+    "start": "^5.1.0",
     "tsparticles": "^1.35.4",
-    "web-vitals": "^1.0.1"
+    "web-vitals": "^1.0.1",
+    "yarn": "^1.22.17"
   },
   "scripts": {
     "start": "react-scripts start",

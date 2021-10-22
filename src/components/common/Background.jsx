@@ -6,11 +6,12 @@ import confetiParticlesOptions from './confetisParticlesOptions';
 import ballsParticlesOptions from './ballsParticlesOptions';
 
 let interval = 0;
-export const Background = ({id, count, type}) => {
+export const Background = ({count, type}) => {
   let [particlesClass, setParticlesClass] = useState('');
   let [options, setOptions] = useState(ballsParticlesOptions);
 
   useEffect(() => {
+    console.log('Background', count, type);
     let options = {};
     if (type === 'balls') {
       options = {

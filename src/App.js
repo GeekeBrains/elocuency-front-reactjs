@@ -7,12 +7,11 @@ import {ChatInput} from 'components/chat/ChatInput';
 import {apiPost} from './libs/ApiCall';
 import {Background} from 'components/common/Background';
 import {Login} from 'components/Login';
-import {Score} from 'components/Score';
+import {ScoreOld} from 'components/ScoreOld';
 import {playEmotion} from 'libs/Sound';
-import {Speedometer} from 'components/Speedometer';
+import {Score} from 'components/Score';
 import {calculateBounds} from 'tsparticles';
 
-const CHAT_ID = 1;
 const DIVISIBLE_TO_PRIZE = 5;
 const WAIT_SORT = 800;
 const WAIT_LONG = 4000;
@@ -22,6 +21,9 @@ export function App() {
   const [user, setUser] = useState(
     JSON.parse(localStorage.getItem('user')) ?? {userId: ''},
   );
+  const [chatId, setChatId] = useState(
+    JSON.parse(localStorage.getItem('chatId')) ?? 1,
+  );
   const [msgs, setMsgs] = useState([]);
   const [voiceSpanish, setVoiceSpanish] = useState([]);
   const [voiceEnglish, setVoiceEnglish] = useState([]);
@@ -30,8 +32,8 @@ export function App() {
   const [wordNumberOk, setWordNumberOk] = useState(0);
   const [background, setBackground] = useState('balls');
   const [startTime, setStartTime] = useState(new Date());
-  const [speed, setSpeed] = useState(0);
-  const [timeUsed, setTimeUsed] = useState(0);
+  // const [speed, setSpeed] = useState(0);
+  // const [timeUsed, setTimeUsed] = useState(0);
 
   // The first time
   useEffect(() => {
@@ -88,22 +90,17 @@ export function App() {
     //   }
     // }, 10000);
 
-    // Speedometer
-    const interval = setInterval(() => {
-      let localCountOk = 0;
-      setCountOk(value => {
-        localCountOk = value;
-        return value;
-      });
-      const endTime = new Date();
-      var min = (endTime.getTime() - startTime.getTime()) / 1000 / 60;
-      setTimeUsed(min * 60);
-      setSpeed(localCountOk / min);
-      // console.log('speed', localCountOk, min, wordNumberOk / min);
-    }, 1000);
+    // Speed
+    // const interval = setInterval(() => {
+    //   // console.log('speed', localCountOk, min, wordNumberOk / min);
+    // }, 1000);
 
-    return () => clearInterval(interval);
+    // return () => clearInterval(interval);
   }, []);
+
+  const endTime = new Date();
+  var min = (endTime.getTime() - startTime.getTime()) / 1000 / 60;
+  const speed = countOk / min;
 
   // Render ------------------------------------
   return (
@@ -124,6 +121,13 @@ export function App() {
               voiceSpanish={voiceSpanish}
               voiceEnglish={voiceEnglish}
             />
+            <Score
+              speed={speed}
+              countOk={countOk}
+              wordNumberTarget={wordNumberTarget}
+              wordNumberOk={wordNumberOk}
+            />
+
             <footer
               style={{
                 display: 'flex',
@@ -136,15 +140,10 @@ export function App() {
                 justifyContent: 'center',
               }}
             >
-              <Score
-                wordNumberTarget={wordNumberTarget}
-                wordNumberOk={wordNumberOk}
-                countOk={countOk}
-              />
               <ChatInput
                 onAdd={async (text, speechRecognitionResults) => {
                   let waitAMoment = WAIT_SORT;
-                  const resp = await apiPost('/chats/' + CHAT_ID + '/msgs', {
+                  const resp = await apiPost('/chats/' + chatId + '/msgs', {
                     text,
                     userId: user.id,
                     speechRecognitionResults,
@@ -168,7 +167,7 @@ export function App() {
                           msgsClone.push({
                             text: msgResp.text,
                             userId: 'prize',
-                            chatId: CHAT_ID,
+                            chatId: chatId,
                             prize: nextCountOk,
                           });
                           playEmotion('ok3');
@@ -186,7 +185,7 @@ export function App() {
                       msgsClone.push({
                         text: msgResp.text,
                         userId: msgResp.userId,
-                        chatId: CHAT_ID,
+                        chatId: chatId,
                       });
                       setTimeout(() => {
                         // Habla ---------------------
@@ -223,11 +222,6 @@ export function App() {
                     }, waitAMoment + 1000);
                   }
                 }}
-              />
-              <Speedometer
-                speed={speed}
-                timeUsed={timeUsed}
-                countOk={countOk}
               />
             </footer>
           </div>
