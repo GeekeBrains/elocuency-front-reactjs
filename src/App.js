@@ -1,5 +1,5 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import {useEffect, useState} from 'react';
+import {useEffect, useRef, useState} from 'react';
 
 import './App.css';
 import {ChatMsgs} from './components/chat/ChatMsgs';
@@ -7,15 +7,10 @@ import {ChatInput} from 'components/chat/ChatInput';
 import {apiPost} from './libs/ApiCall';
 import {Background} from 'components/common/Background';
 import {Login} from 'components/Login';
-import {ScoreOld} from 'components/ScoreOld';
-import {playEmotion} from 'libs/Sound';
 import {Score} from 'components/Score';
-import {calculateBounds} from 'tsparticles';
+import {defaultMargin} from '@nivo/core';
 
 const DIVISIBLE_TO_PRIZE = 5;
-const WAIT_SORT = 800;
-const WAIT_LONG = 4000;
-let calculatingSpeed = false;
 
 export function App() {
   const [user, setUser] = useState(
@@ -25,17 +20,20 @@ export function App() {
     JSON.parse(localStorage.getItem('chatId')) ?? 1,
   );
   const [msgs, setMsgs] = useState([]);
-  const [voiceSpanish, setVoiceSpanish] = useState([]);
-  const [voiceEnglish, setVoiceEnglish] = useState([]);
+  const [msgsAux, setMsgsAux] = useState([]);
   const [countOk, setCountOk] = useState(0);
   const [wordNumberTarget, setWordNumberTarget] = useState(0);
   const [wordNumberOk, setWordNumberOk] = useState(0);
   const [background, setBackground] = useState('balls');
   const [startTime, setStartTime] = useState(new Date());
-  // const [speed, setSpeed] = useState(0);
+  const [voiceSpanish, setVoiceSpanish] = useState(null);
+  const [voiceEnglish, setVoiceEnglish] = useState(null);
   // const [timeUsed, setTimeUsed] = useState(0);
+  const [msgIndex, setMsgIndex] = useState(0);
 
-  // The first time
+  const scoreRef = useRef(null);
+
+  /* The first time */
   useEffect(() => {
     if (!user?.id) {
       return;
@@ -61,47 +59,177 @@ export function App() {
       },
     );
 
-    // Carga voces --------------------------
+    /* Carga voces */
     if ('onvoiceschanged' in global.speechSynthesis) {
+      console.log('Hay onvoiceschanged');
       global.speechSynthesis.onvoiceschanged = function () {
+        console.log('On onvoiceschanged');
         let vocesDisponibles = global.speechSynthesis.getVoices();
         vocesDisponibles.forEach(voz => {
-          // console.log('VOZ', voz);
           if (voz.name === 'Google español') {
-            // console.log('----', voz);
+            console.log(voz.name);
             setVoiceSpanish(voz);
           }
           if (voz.name === 'Google UK English Female') {
-            // console.log('----', voz);
+            console.log(voz.name);
             setVoiceEnglish(voz);
           }
         });
       };
+    } else {
+      console.error('ERROR, onvoiceschanged no loaded');
     }
-
-    // setInterval(() => {
-    //   console.log('app', background);
-    //   if (background === 'balls') {
-    //     console.log('app set confeti');
-    //     setBackground('confeti');
-    //   } else {
-    //     console.log('app set ball');
-    //     setBackground('balls');
-    //   }
-    // }, 10000);
-
-    // Speed
-    // const interval = setInterval(() => {
-    //   // console.log('speed', localCountOk, min, wordNumberOk / min);
-    // }, 1000);
-
-    // return () => clearInterval(interval);
   }, []);
 
+  /* OnChange msgIndex */
+  useEffect(() => {
+    console.log('msgsAux change');
+    nextIndex();
+  }, [msgsAux]);
+
+  /* OnChange msgIndex */
+  useEffect(() => {
+    const activeMsg = msgsAux[msgIndex];
+    console.log('on Change msgIndex', {activeMsg, msgIndex, msgs});
+    setMsgs(msgsAux.slice(0, msgIndex + 1));
+    speak(activeMsg);
+  }, [msgIndex]);
+
+  /* setMsgIndex function */
+  function nextIndex(currentIndex) {
+    setMsgIndex(currentIndex => {
+      // console.log('nexIndex', currentIndex, msgs.length, msgs);
+      if (currentIndex < msgsAux.length - 1) {
+        // console.log('nexIndex ok ', currentIndex + 1);
+        return currentIndex + 1;
+      } else {
+        // console.log('nexIndex ko ', currentIndex);
+        return currentIndex;
+      }
+    });
+  }
+
+  /* playEmotion */
+  function playEmotion(emotion, callback) {
+    const max = 6; // Not include
+    const min = 1; // Inlcuded
+    const rand = Math.floor(Math.random() * (max - min) + min);
+    const soundFile = 'audio/' + emotion + '/' + rand + '.mp3';
+    console.log(soundFile);
+    var audio = new Audio(soundFile);
+    if (emotion == 'ok3') {
+      setBackground('confeti');
+    }
+    audio.play();
+    audio.addEventListener('loadeddata', () => {
+      console.log('Terminó el audio');
+      if (background === 'confeti') {
+        setBackground('balls');
+      }
+      callback();
+    });
+  }
+
+  /* Speak */
+  function speak(msgResp) {
+    if (!msgResp) return;
+
+    console.log('SPEAK', msgResp);
+    if (msgResp.userId.slice(0, 3) !== 'bot') {
+      console.log('speak not a bot', msgResp.userId.slice(-3));
+      nextIndex();
+      return;
+    }
+
+    if (msgResp.emotion) {
+      /* Emotional sound */
+      console.log('emotion', msgResp.emotion);
+      playEmotion(msgResp.emotion, () => {
+        console.log('nextIndex end playemotion');
+        msgResp.emotion = null;
+        speak(msgResp);
+      });
+    } else {
+      /* Speak */
+      if (msgResp && voiceSpanish && voiceEnglish && !msgResp.voice?.mute) {
+        let ssu = new global.SpeechSynthesisUtterance(msgResp.text);
+        if (ssu) {
+          if (
+            msgResp.userId === 'botSpanish' ||
+            msgResp.userId === 'botPrize'
+          ) {
+            ssu.voice = voiceSpanish;
+            ssu.lang = 'es-ES';
+          } else if (msgResp.userId === 'botEnglish') {
+            ssu.voice = voiceEnglish;
+            ssu.lang = 'en-GB';
+          }
+          ssu.rate = msgResp.voice?.rate || 1;
+
+          global.speechSynthesis.speak(ssu);
+
+          /* On End of speak */
+          ssu.onend = function () {
+            console.log('nextIndex on end Speak');
+            nextIndex();
+          };
+        } else {
+          console.error('ERROR Load mensage');
+        }
+      } else {
+        console.error({msgResp, voiceSpanish, voiceEnglish});
+      }
+    }
+  }
   const endTime = new Date();
+
   var min = (endTime.getTime() - startTime.getTime()) / 1000 / 60;
   const speed = countOk / min;
 
+  /* processesUserResponse */
+  async function processesUserResponse(userText) {
+    scoreRef.current.resetTime();
+    const resp = await apiPost('/chats/' + chatId + '/msgs', {
+      text: userText,
+      userId: user.id,
+      // speechRecognitionResults,
+    });
+    if (resp.data) {
+      const msgsClone = JSON.parse(JSON.stringify(msgs));
+      msgsClone.push({text: userText, userId: user.id});
+      for (const msgResp of resp.data) {
+        const msg = {
+          text: msgResp.text,
+          userId: msgResp.userId,
+          chatId: chatId,
+        };
+
+        if (msgResp.wordNumberTarget) {
+          setWordNumberTarget(msgResp.wordNumberTarget);
+          setWordNumberOk(msgResp.wordNumberOk);
+        }
+
+        if (msgResp.emotionalResponse === 'ok') {
+          const nextCountOk = countOk + 1;
+          setCountOk(nextCountOk);
+          if (nextCountOk > 0 && nextCountOk % DIVISIBLE_TO_PRIZE === 0) {
+            msg.userId = 'botPrize';
+            msg.prize = nextCountOk;
+            msg.emotion = 'ok3';
+          } else {
+            msg.emotion = 'ok1';
+          }
+        } else if (msgResp.emotionalResponse === 'ko') {
+          msg.emotion = 'ko1';
+        }
+        msgsClone.push(msg);
+      }
+
+      setMsgsAux(msgsClone);
+    }
+  }
+
+  // console.log({msgs});
   // Render ------------------------------------
   return (
     <>
@@ -124,8 +252,13 @@ export function App() {
             <Score
               speed={speed}
               countOk={countOk}
+              // time={timeUsed}
               wordNumberTarget={wordNumberTarget}
               wordNumberOk={wordNumberOk}
+              endTimeEvent={() => {
+                processesUserResponse('?');
+              }}
+              ref={scoreRef}
             />
 
             <footer
@@ -140,89 +273,7 @@ export function App() {
                 justifyContent: 'center',
               }}
             >
-              <ChatInput
-                onAdd={async (text, speechRecognitionResults) => {
-                  let waitAMoment = WAIT_SORT;
-                  const resp = await apiPost('/chats/' + chatId + '/msgs', {
-                    text,
-                    userId: user.id,
-                    speechRecognitionResults,
-                  });
-                  if (resp.data) {
-                    const msgsClone = JSON.parse(JSON.stringify(msgs));
-                    msgsClone.push({text, userId: user.id});
-                    resp.data.forEach(msgResp => {
-                      if (msgResp.wordNumberTarget) {
-                        setWordNumberTarget(msgResp.wordNumberTarget);
-                        setWordNumberOk(msgResp.wordNumberOk);
-                      }
-
-                      if (msgResp.emotionalResponse === 'ok') {
-                        const nextCountOk = countOk + 1;
-                        setCountOk(nextCountOk);
-                        if (
-                          nextCountOk > 0 &&
-                          nextCountOk % DIVISIBLE_TO_PRIZE === 0
-                        ) {
-                          msgsClone.push({
-                            text: msgResp.text,
-                            userId: 'prize',
-                            chatId: chatId,
-                            prize: nextCountOk,
-                          });
-                          playEmotion('ok3');
-                          waitAMoment = WAIT_LONG;
-                          setMsgs(JSON.parse(JSON.stringify(msgsClone)));
-                          setBackground('confeti');
-                        } else {
-                          playEmotion('ok1');
-                        }
-                      } else if (msgResp.emotionalResponse === 'ko') {
-                        playEmotion('ko1');
-                      }
-
-                      // console.log({msgResp});
-                      msgsClone.push({
-                        text: msgResp.text,
-                        userId: msgResp.userId,
-                        chatId: chatId,
-                      });
-                      setTimeout(() => {
-                        // Habla ---------------------
-                        if (
-                          voiceSpanish &&
-                          voiceEnglish &&
-                          !msgResp.voice?.mute
-                        ) {
-                          let mensaje = new global.SpeechSynthesisUtterance(
-                            msgResp.text,
-                          );
-                          if (msgResp.userId === 'botSpanish') {
-                            mensaje.voice = voiceSpanish;
-                            mensaje.lang = 'es-ES';
-                          } else if (msgResp.userId === 'botEnglish') {
-                            mensaje.voice = voiceEnglish;
-                            mensaje.lang = 'en-GB';
-                          }
-                          // console.log(mensaje);
-                          mensaje.rate = msgResp.voice?.rate || 1;
-                          // mensaje.volume = 1;
-                          // mensaje.pitch = 1;
-                          global.speechSynthesis.speak(mensaje);
-                          // mensaje.text = msg;
-                          // mensaje.pitch = 1;
-                          // mensaje.lang = 'en-US';
-                        }
-                      }, waitAMoment);
-                    });
-                    setTimeout(() => {
-                      console.log('Refres msgClone');
-                      setMsgs(msgsClone);
-                      setBackground('balls');
-                    }, waitAMoment + 1000);
-                  }
-                }}
-              />
+              <ChatInput onAdd={text => processesUserResponse(text)} />
             </footer>
           </div>
         </>

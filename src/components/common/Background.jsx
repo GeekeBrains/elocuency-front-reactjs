@@ -5,9 +5,8 @@ import Particles from 'react-tsparticles';
 import confetiParticlesOptions from './confetisParticlesOptions';
 import ballsParticlesOptions from './ballsParticlesOptions';
 
-let interval = 0;
 export const Background = ({count, type}) => {
-  let [particlesClass, setParticlesClass] = useState('');
+  // let [particlesClass, setParticlesClass] = useState('');
   let [options, setOptions] = useState(ballsParticlesOptions);
 
   useEffect(() => {
@@ -69,11 +68,11 @@ export const Background = ({count, type}) => {
       ...options,
     };
 
-    console.log('change opacity 0');
+    // console.log('change opacity 0');
     const canvas = document.getElementsByClassName('particles-canvas')[0];
     canvas.style.opacity = 0;
     setTimeout(() => {
-      console.log('change opacity 1');
+      // console.log('change opacity 1');
       canvas.style.opacity = 1;
       setOptions(options);
     }, 1000);

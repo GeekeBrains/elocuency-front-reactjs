@@ -11,7 +11,7 @@ export const ChatMsgs = ({
   const chatMsgsRef = useRef();
 
   useEffect(() => {
-    console.log('ref:', chatMsgsRef);
+    // console.log('ref:', chatMsgsRef);
     const chatView = chatMsgsRef.current; //?.scrollIntoView({ behavior: "smooth" });
     // var chatView = global.document.getElementById('chatView');
     chatView.scrollTop = chatView.scrollHeight - chatView.clientHeight;
@@ -33,7 +33,7 @@ export const ChatMsgs = ({
       {msgs.map((msg, index) => {
         return (
           <>
-            {msg.userId === 'prize' ? (
+            {msg.userId === 'botPrize' ? (
               <ChatMsgPrize key={'keyMsgPrize' + index} msg={msg} />
             ) : (
               <ChatMsg

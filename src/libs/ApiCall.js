@@ -32,7 +32,7 @@ export async function apiCall(method, endpoint, data, dataResp) {
     },
   });
 
-  // console.log('apiCall', axiosResp);
+  console.log('apiCall', axiosResp);
   if (dataResp && dataResp.onResponse && axiosResp.statusText === 'OK') {
     // console.log('apiCall onResponse', axiosResp);
     dataResp.onResponse(axiosResp.data);

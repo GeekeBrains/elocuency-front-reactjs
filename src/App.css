@@ -115,13 +115,13 @@ body {
   z-index: 0 !important;
 }
 
-.speedometer {
+.score {
   position: absolute;
   top: calc(50% - 150px);
   left: calc(50% - 150px);
 }
 
-.speedometer .text {
+.score .text {
   position: relative;
   top: -33px;
   left: 33px;

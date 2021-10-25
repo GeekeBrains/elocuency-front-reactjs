@@ -161,7 +161,7 @@ export default {
       },
     },
     color: {
-      value: '#fce11c', // Color de la bola
+      value: '#fbec3a40', // Color de la bola
       animation: {
         h: {
           count: 0,
