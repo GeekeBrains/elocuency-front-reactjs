@@ -26,7 +26,7 @@ export const Score = forwardRef(
     useEffect(() => {
       const interval = setInterval(() => {
         setTime(value => {
-          if (value > SECONDS_MAX * 2) {
+          if (value > SECONDS_MAX) {
             endTimeEvent();
             return 0;
           } else {
@@ -38,9 +38,9 @@ export const Score = forwardRef(
       return () => clearInterval(interval);
     });
 
-    const levelTargetArc = (Math.PI * wordNumberOk) / wordNumberTarget;
-    const dailyTargetArc = (Math.PI * countOk) / DAILY_TARGET;
-    const timeArc = (Math.PI * time) / SECONDS_MAX;
+    const levelTargetArc = (Math.PI * wordNumberOk) / (wordNumberTarget / 2);
+    const dailyTargetArc = (Math.PI * countOk) / (DAILY_TARGET / 2);
+    const timeArc = (Math.PI * time) / (SECONDS_MAX / 2);
 
     // console.log({
     //   wordNumberOk,
@@ -89,7 +89,12 @@ export const Score = forwardRef(
             colorRange={['#ffffff5e', '#3c52f340']}
           />
         </XYPlot>
-
+        {/* {countOk}/{wordNumberOk}/{wordNumberTarget}
+        <br></br>
+        {countOk}/{DAILY_TARGET}
+        <br></br>
+        {time}/{SECONDS_MAX}
+        <br></br> */}
         {/* <GaugeChart
         id="gauge-chart4"
         nrOfLevels={10}
