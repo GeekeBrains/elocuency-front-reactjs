@@ -1,5 +1,6 @@
+import {UserButton} from 'components/UserButton';
 import {useState} from 'react';
-import {ChatMic} from './ChatMic';
+import {ChatMicSvg} from './ChatMicSvg';
 
 try {
   var SpeechRecognition =
@@ -10,7 +11,7 @@ try {
   console.error(e);
 }
 
-export const ChatInput = ({onAdd}) => {
+export const ChatInput = ({onAdd, user}) => {
   const [text, setText] = useState('');
 
   recognition.onerror = function (event) {
@@ -66,6 +67,13 @@ export const ChatInput = ({onAdd}) => {
         paddingLeft: 9,
       }}
     >
+      {/* <UserButton
+        user={user}
+        onClick={() => {
+          console.log('click');
+          onAdd('!ver mis datos');
+        }}
+      /> */}
       <input
         style={{
           fontSize: 20,
@@ -86,7 +94,7 @@ export const ChatInput = ({onAdd}) => {
           setText(v.target.value);
         }}
       ></input>
-      <ChatMic
+      <ChatMicSvg
         style={{marginLeft: -50}}
         onMouseDown={() => {
           recognition.start();

@@ -8,7 +8,6 @@ import {apiPost} from './libs/ApiCall';
 import {Background} from 'components/common/Background';
 import {Login} from 'components/Login';
 import {Score} from 'components/Score';
-import {defaultMargin} from '@nivo/core';
 
 const DIVISIBLE_TO_PRIZE = 5;
 
@@ -16,7 +15,7 @@ export function App() {
   const [user, setUser] = useState(
     JSON.parse(localStorage.getItem('user')) ?? {userId: ''},
   );
-  const [chatId, setChatId] = useState(
+  const [chatId /*, setChatId*/] = useState(
     JSON.parse(localStorage.getItem('chatId')) ?? 1,
   );
   const [msgs, setMsgs] = useState([]);
@@ -96,7 +95,7 @@ export function App() {
   }, [msgIndex]);
 
   /* setMsgIndex function */
-  function nextIndex(currentIndex) {
+  function nextIndex() {
     setMsgIndex(currentIndex => {
       // console.log('nexIndex', currentIndex, msgs.length, msgs);
       if (currentIndex < msgsAux.length - 1) {
@@ -211,6 +210,10 @@ export function App() {
 
         if (msgResp.emotionalResponse === 'ok') {
           const nextCountOk = countOk + 1;
+          msgsClone.push({
+            userId: 'botEnglish',
+            text: userText,
+          });
           setCountOk(nextCountOk);
           if (nextCountOk > 0 && nextCountOk % DIVISIBLE_TO_PRIZE === 0) {
             msg.userId = 'botPrize';
@@ -273,7 +276,10 @@ export function App() {
                 justifyContent: 'center',
               }}
             >
-              <ChatInput onAdd={text => processesUserResponse(text)} />
+              <ChatInput
+                user={user.email}
+                onAdd={text => processesUserResponse(text)}
+              />
             </footer>
           </div>
         </>

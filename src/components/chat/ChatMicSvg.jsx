@@ -1,6 +1,6 @@
 import {useState} from 'react';
 
-export const ChatMic = ({onMouseDown, onMouseUp}) => {
+export const ChatMicSvg = ({onMouseDown, onMouseUp}) => {
   const [color, setColor] = useState('black');
 
   return (
