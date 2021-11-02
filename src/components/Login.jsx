@@ -26,20 +26,18 @@ export const Login = ({onChange}) => {
           }}
         ></input>
       </div>
-      <div className="row">
-        <button
-          onClick={async () => {
-            const resp = await apiPost('/users/login', {
-              login,
-              password,
-            });
-            console.log('login', resp);
-            onChange(resp.data);
-          }}
-        >
-          Aceptar
-        </button>
-      </div>
+      <button
+        className="chatButton"
+        onClick={async () => {
+          const resp = await apiPost('/users/login', {
+            login,
+            password,
+          });
+          onChange(resp.data);
+        }}
+      >
+        Aceptar
+      </button>
     </div>
   );
 };

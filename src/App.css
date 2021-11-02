@@ -48,88 +48,34 @@ body {
   z-index: 10;
 }
 
+/* Chat ------------------------*/
 #chatView {
   height: calc(100vh - 65px) !important;
+  z-index: 1;
 }
 
-.login {
-  font-family: system-ui;
-  display: flex;
-  flex-direction: column;
-  box-shadow: 2px 2px 5px 0px #284035;
-  border-radius: 15px;
-  padding: 45px;
-  margin-top: 20px;
+.chatMsg,
+.chatMarkdown {
+  max-width: 80%;
+  border-radius: 8px;
+  border-style: solid;
+  border-width: 1px;
+  border-color: #94979994;
+  margin: 5px;
+  padding: 10px;
+  margin-left: 24px;
+  align-self: flex-start;
+  background-color: #ffffffc7;
 }
 
-.login .row {
-  width: 100%;
-  padding-bottom: 10px;
+.chatMsg-bot {
+  align-self: flex-start;
+  background-color: #ffffffc7;
 }
 
-.login label {
-  font-size: 16px;
-}
-
-.login input {
-  margin-top: 5px;
-  font-size: 16px;
-  width: 96%;
-}
-
-.login button {
-  float: right;
-  background-color: #008cba; /* Green */
-  border: none;
-  color: white;
-  padding: 15px 32px;
-  text-align: center;
-  text-decoration: none;
-  display: inline-block;
-  font-size: 16px;
-  margin: 4px 2px;
-  cursor: pointer;
-}
-
-.score {
-  margin-top: 15px;
-  font-size: x-large;
-  color: white;
-}
-
-.fadeOut {
-  /* visibility: hidden;
-  transition-property: visibility;
-  transition-duration: 4s;
-  transition-delay: 2s;
-  transition-timing-function: ease-out; */
-  visibility: hidden;
-  opacity: 0;
-  transition: visibility 1s ease-out, opacity 1s ease-out;
-}
-
-#particles canvas {
-  visibility: visible;
-  opacity: 1;
-  transition: visibility 1s ease-out, opacity 1s ease-out;
-  z-index: 0 !important;
-}
-
-.score {
-  position: absolute;
-  top: calc(50% - 150px);
-  left: calc(50% - 150px);
-}
-
-.score .text {
-  position: relative;
-  top: -33px;
-  left: 33px;
-  font-size: 13px;
-  color: white;
-  width: 30px;
-  /* border: 1px solid blue; */
-  text-align: center;
+.chatMsg-user {
+  align-self: flex-end;
+  background-color: rgb(143 241 147 / 60%);
 }
 
 .chatMsgPrize {
@@ -150,6 +96,95 @@ body {
   justify-content: center;
   box-shadow: 2px 2px 5px 1px black;
   color: #f8f8ffd9;
+}
+
+.chatButton {
+  max-width: 80%;
+  border-radius: 25px;
+  border-style: solid;
+  border-width: 1px;
+  border-color: #94979994;
+  margin: 5px;
+  padding: 10px;
+  margin-left: 24px;
+  align-self: self-start;
+  background-color: #6ecb35;
+  text-decoration: underline;
+  color: white;
+  padding-right: 15px;
+  padding-left: 15px;
+  cursor: pointer;
+}
+
+/* Login --------------------*/
+.login {
+  font-family: system-ui;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 2px 2px 5px 0px #284035;
+  border-radius: 15px;
+  padding: 45px;
+  margin-top: 20px;
+  background-color: #ffffffc7;
+}
+
+.login .row {
+  width: 100%;
+  padding-bottom: 10px;
+}
+
+.login label {
+  font-size: 16px;
+}
+
+.login input {
+  margin-top: 5px;
+  font-size: 16px;
+  width: 96%;
+}
+
+.login button {
+  align-self: flex-end;
+}
+
+.fadeOut {
+  /* visibility: hidden;
+  transition-property: visibility;
+  transition-duration: 4s;
+  transition-delay: 2s;
+  transition-timing-function: ease-out; */
+  visibility: hidden;
+  opacity: 0;
+  transition: visibility 1s ease-out, opacity 1s ease-out;
+}
+
+#particles canvas {
+  visibility: visible;
+  opacity: 1;
+  transition: visibility 1s ease-out, opacity 1s ease-out;
+  z-index: 0 !important;
+}
+
+/* Score ----------------------- */
+.score {
+  margin-top: 15px;
+  font-size: x-large;
+  color: white;
+  position: absolute;
+  top: calc(50% - 150px);
+  left: calc(50% - 150px);
+  z-index: 0;
+}
+
+.score .text {
+  position: relative;
+  top: -33px;
+  left: 33px;
+  font-size: 13px;
+  color: white;
+  width: 30px;
+  /* border: 1px solid blue; */
+  text-align: center;
 }
 
 .userButton {

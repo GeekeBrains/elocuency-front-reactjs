@@ -24,18 +24,17 @@ export const Score = forwardRef(
     }));
 
     useEffect(() => {
-      const interval = setInterval(() => {
-        setTime(value => {
-          if (value > SECONDS_MAX) {
-            endTimeEvent();
-            return 0;
-          } else {
-            return value + 1;
-          }
-        });
-      }, 500);
-
-      return () => clearInterval(interval);
+      // const interval = setInterval(() => {
+      //   setTime(value => {
+      //     if (value > SECONDS_MAX) {
+      //       endTimeEvent();
+      //       return 0;
+      //     } else {
+      //       return value + 1;
+      //     }
+      //   });
+      // }, 500);
+      // return () => clearInterval(interval);
     });
 
     const levelTargetArc = (Math.PI * wordNumberOk) / (wordNumberTarget / 2);

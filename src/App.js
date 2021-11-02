@@ -12,12 +12,8 @@ import {Score} from 'components/Score';
 const DIVISIBLE_TO_PRIZE = 5;
 
 export function App() {
-  const [user, setUser] = useState(
-    JSON.parse(localStorage.getItem('user')) ?? {userId: ''},
-  );
-  const [chatId /*, setChatId*/] = useState(
-    JSON.parse(localStorage.getItem('chatId')) ?? 1,
-  );
+  const [user, setUser] = useState('');
+  const [chatId, setChatId] = useState('');
   const [msgs, setMsgs] = useState([]);
   const [msgsAux, setMsgsAux] = useState([]);
   const [countOk, setCountOk] = useState(0);
@@ -32,33 +28,12 @@ export function App() {
 
   const scoreRef = useRef(null);
 
-  /* The first time */
+  /* Init App */
   useEffect(() => {
-    if (!user?.id) {
-      return;
-    }
-    apiPost(
-      '/users/' + user?.id + '/send-msg',
-      {text: ''},
-      {
-        onResponse: resp => {
-          console.log('sdf>>>wewerwe');
-          const msgsClone = JSON.parse(JSON.stringify(msgs));
-          resp.forEach(msgResp => {
-            console.log('sdf>>>', msgResp);
-            msgsClone.push({text: msgResp.text, userId: msgResp.userId});
-          });
-          setMsgs(msgsClone);
-        },
-        onError: () => {
-          const msgsClone = JSON.parse(JSON.stringify(msgs));
-          msgsClone.push({text: 'Uff, no estoy conectado!!', userId: 'bot1'});
-          setMsgs(msgsClone);
-        },
-      },
-    );
+    setChatId(localStorage.getItem('chatId') ?? '');
+    setUser(JSON.parse(localStorage.getItem('user')) ?? {});
 
-    /* Carga voces */
+    /* Load voices */
     if ('onvoiceschanged' in global.speechSynthesis) {
       console.log('Hay onvoiceschanged');
       global.speechSynthesis.onvoiceschanged = function () {
@@ -80,7 +55,46 @@ export function App() {
     }
   }, []);
 
-  /* OnChange msgIndex */
+  /* OnChange user */
+  useEffect(() => {
+    processesUserResponse('?');
+
+    // if (user?.id) {
+    //   const resp = await apiPost('/chats/' + chatId + '/msgs', {
+    //     text: userText,
+    //     userId: user.id,
+    //     langId: 'es',
+    //     type: 'text',
+    //     // speechRecognitionResults,
+    //   });
+
+    //   apiPost(
+    //     '/users/' + user?.id + '/send-msg',
+    //     {text: ''},
+    //     {
+    //       onResponse: resp => {
+    //         const msgsClone = JSON.parse(JSON.stringify(msgs));
+    //         resp.forEach(msgResp => {
+    //           msgsClone.push({
+    //             text: msgResp.text,
+    //             userId: msgResp.userId,
+    //             langId: 'es',
+    //             type: 'text',
+    //           });
+    //         });
+    //         setMsgs(msgsClone);
+    //       },
+    //       onError: () => {
+    //         const msgsClone = JSON.parse(JSON.stringify(msgs));
+    //         msgsClone.push({text: 'Uff, no estoy conectado!!', userId: 'bot1'});
+    //         setMsgs(msgsClone);
+    //       },
+    //     },
+    //   );
+    // }
+  }, [user]);
+
+  /* OnChange msgsAux */
   useEffect(() => {
     console.log('msgsAux change');
     nextIndex();
@@ -91,8 +105,19 @@ export function App() {
     const activeMsg = msgsAux[msgIndex];
     console.log('on Change msgIndex', {activeMsg, msgIndex, msgs});
     setMsgs(msgsAux.slice(0, msgIndex + 1));
-    speak(activeMsg);
+    if (activeMsg) {
+      if (activeMsg.type === 'text') {
+        speak(activeMsg);
+      } else {
+        nextIndex();
+      }
+    }
   }, [msgIndex]);
+
+  /* commandSessionClose */
+  function commandSessionClose() {
+    setUser({});
+  }
 
   /* setMsgIndex function */
   function nextIndex() {
@@ -180,29 +205,24 @@ export function App() {
       }
     }
   }
-  const endTime = new Date();
 
-  var min = (endTime.getTime() - startTime.getTime()) / 1000 / 60;
-  const speed = countOk / min;
-
-  /* processesUserResponse */
+  /* Processes User Response */
   async function processesUserResponse(userText) {
-    scoreRef.current.resetTime();
+    if (!chatId) return;
+
+    scoreRef?.current?.resetTime();
     const resp = await apiPost('/chats/' + chatId + '/msgs', {
       text: userText,
       userId: user.id,
+      langId: 'es',
+      type: 'text',
       // speechRecognitionResults,
     });
     if (resp.data) {
       const msgsClone = JSON.parse(JSON.stringify(msgs));
       msgsClone.push({text: userText, userId: user.id});
       for (const msgResp of resp.data) {
-        const msg = {
-          text: msgResp.text,
-          userId: msgResp.userId,
-          chatId: chatId,
-        };
-
+        const msg = msgResp;
         if (msgResp.wordNumberTarget) {
           setWordNumberTarget(msgResp.wordNumberTarget);
           setWordNumberOk(msgResp.wordNumberOk);
@@ -225,22 +245,40 @@ export function App() {
         } else if (msgResp.emotionalResponse === 'ko') {
           msg.emotion = 'ko1';
         }
+
+        if (msgResp.command === 'session.close') {
+          msgResp.commandFunc = commandSessionClose;
+        }
+
         msgsClone.push(msg);
       }
 
+      console.log('msgs', {msgs, msgsClone});
       setMsgsAux(msgsClone);
     }
   }
 
+  const endTime = new Date();
+
+  var min = (endTime.getTime() - startTime.getTime()) / 1000 / 60;
+  const speed = countOk / min;
+
   // console.log({msgs});
+
   // Render ------------------------------------
   return (
     <>
       {!user?.id ? (
         <Login
           onChange={user => {
+            console.log({user});
+            setMsgsAux([]);
+            setMsgs([]);
+            setMsgIndex(0);
             localStorage.setItem('user', JSON.stringify(user));
             setUser(user);
+            localStorage.setItem('chatId', user.chatId);
+            setChatId(user.chatId);
           }}
         />
       ) : (

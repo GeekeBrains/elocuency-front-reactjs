@@ -1,4 +1,6 @@
 import {useEffect, useRef} from 'react';
+import {ChatButton} from './ChatButton';
+import {ChatMarkdown} from './ChatMarkdown';
 import {ChatMsg} from './ChatMsg';
 import {ChatMsgPrize} from './ChatMsgPrize';
 
@@ -18,6 +20,7 @@ export const ChatMsgs = ({
     // console.log("scroll", chatView);
   }, [msgs]);
 
+  console.log('ChatMsgs', msgs);
   return (
     <div
       ref={chatMsgsRef}
@@ -31,20 +34,29 @@ export const ChatMsgs = ({
       }}
     >
       {msgs.map((msg, index) => {
-        return (
-          <>
-            {msg.userId === 'botPrize' ? (
-              <ChatMsgPrize key={'keyMsgPrize' + index} msg={msg} />
-            ) : (
+        let msgComp = null;
+        if (!msg.type || msg.type === 'text') {
+          if (msg.userId === 'botPrize') {
+            msgComp = <ChatMsgPrize key={'keyMsg' + index} msg={msg} />;
+          } else {
+            msgComp = (
               <ChatMsg
                 key={'keyMsg' + index}
                 msg={msg}
                 voiceSpanish={voiceSpanish}
                 voiceEnglish={voiceEnglish}
               />
-            )}
-          </>
-        );
+            );
+          }
+        } else if (msg.type === 'markdown') {
+          msgComp = <ChatMarkdown key={'keyMsg' + index} text={msg.text} />;
+        } else if (msg.type === 'button') {
+          msgComp = <ChatButton key={'keyMsg' + index} msg={msg} />;
+        } else {
+          console.error('type no definido', msg);
+        }
+
+        return msgComp;
       })}
     </div>
   );

@@ -67,13 +67,13 @@ export const ChatInput = ({onAdd, user}) => {
         paddingLeft: 9,
       }}
     >
-      {/* <UserButton
+      <UserButton
         user={user}
         onClick={() => {
           console.log('click');
           onAdd('!ver mis datos');
         }}
-      /> */}
+      />
       <input
         style={{
           fontSize: 20,
