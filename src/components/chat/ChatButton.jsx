@@ -1,9 +1,7 @@
 import {motion} from 'framer-motion';
 import React from 'react';
-import ReactMarkdown from 'react-markdown';
 
 export const ChatButton = ({msg}) => {
-  let action = () => {};
   return (
     <motion.div
       className="chatButton"

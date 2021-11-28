@@ -20,7 +20,7 @@ export const ChatMsgs = ({
     // console.log("scroll", chatView);
   }, [msgs]);
 
-  console.log('ChatMsgs', msgs);
+  // console.log('ChatMsgs', msgs);
   return (
     <div
       ref={chatMsgsRef}

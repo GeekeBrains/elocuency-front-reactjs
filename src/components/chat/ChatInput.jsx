@@ -1,4 +1,4 @@
-import {UserButton} from 'components/UserButton';
+import {UserButton} from 'components/chat/UserButton';
 import {useState} from 'react';
 import {ChatMicSvg} from './ChatMicSvg';
 

@@ -16,15 +16,18 @@ export function App() {
   const [chatId, setChatId] = useState('');
   const [msgs, setMsgs] = useState([]);
   const [msgsAux, setMsgsAux] = useState([]);
-  const [countOk, setCountOk] = useState(0);
+  const [msgIndex, setMsgIndex] = useState(0);
+
+  const [globalCountOk, setGlobalCountOk] = useState(0);
   const [wordNumberTarget, setWordNumberTarget] = useState(0);
   const [wordNumberOk, setWordNumberOk] = useState(0);
+  const [startTime /*setStartTime*/] = useState(new Date());
+
+  const [activeTimer, setActiveTimer] = useState(false);
   const [background, setBackground] = useState('balls');
-  const [startTime, setStartTime] = useState(new Date());
   const [voiceSpanish, setVoiceSpanish] = useState(null);
   const [voiceEnglish, setVoiceEnglish] = useState(null);
   // const [timeUsed, setTimeUsed] = useState(0);
-  const [msgIndex, setMsgIndex] = useState(0);
 
   const scoreRef = useRef(null);
 
@@ -39,16 +42,29 @@ export function App() {
       global.speechSynthesis.onvoiceschanged = function () {
         console.log('On onvoiceschanged');
         let vocesDisponibles = global.speechSynthesis.getVoices();
+        let defaultEs = '';
+        let googleEs = '';
+        let defaultEn = '';
+        let googleEn = '';
         vocesDisponibles.forEach(voz => {
+          console.log('Voz: ', voz);
           if (voz.name === 'Google español') {
-            console.log(voz.name);
-            setVoiceSpanish(voz);
+            googleEs = voz;
           }
           if (voz.name === 'Google UK English Female') {
-            console.log(voz.name);
-            setVoiceEnglish(voz);
+            googleEn = voz;
+          }
+          if (voz.lang === 'es-ES') {
+            defaultEs = voz;
+          }
+          if (voz.lang === 'en-GB') {
+            defaultEn = voz;
           }
         });
+        setVoiceEnglish(googleEn ?? defaultEn);
+        setVoiceSpanish(googleEs ?? defaultEs);
+        console.log('en', googleEn ?? defaultEn);
+        console.log('es', googleEs ?? defaultEs);
       };
     } else {
       console.error('ERROR, onvoiceschanged no loaded');
@@ -58,40 +74,6 @@ export function App() {
   /* OnChange user */
   useEffect(() => {
     processesUserResponse('?');
-
-    // if (user?.id) {
-    //   const resp = await apiPost('/chats/' + chatId + '/msgs', {
-    //     text: userText,
-    //     userId: user.id,
-    //     langId: 'es',
-    //     type: 'text',
-    //     // speechRecognitionResults,
-    //   });
-
-    //   apiPost(
-    //     '/users/' + user?.id + '/send-msg',
-    //     {text: ''},
-    //     {
-    //       onResponse: resp => {
-    //         const msgsClone = JSON.parse(JSON.stringify(msgs));
-    //         resp.forEach(msgResp => {
-    //           msgsClone.push({
-    //             text: msgResp.text,
-    //             userId: msgResp.userId,
-    //             langId: 'es',
-    //             type: 'text',
-    //           });
-    //         });
-    //         setMsgs(msgsClone);
-    //       },
-    //       onError: () => {
-    //         const msgsClone = JSON.parse(JSON.stringify(msgs));
-    //         msgsClone.push({text: 'Uff, no estoy conectado!!', userId: 'bot1'});
-    //         setMsgs(msgsClone);
-    //       },
-    //     },
-    //   );
-    // }
   }, [user]);
 
   /* OnChange msgsAux */
@@ -114,11 +96,6 @@ export function App() {
     }
   }, [msgIndex]);
 
-  /* commandSessionClose */
-  function commandSessionClose() {
-    setUser({});
-  }
-
   /* setMsgIndex function */
   function nextIndex() {
     setMsgIndex(currentIndex => {
@@ -139,14 +116,14 @@ export function App() {
     const min = 1; // Inlcuded
     const rand = Math.floor(Math.random() * (max - min) + min);
     const soundFile = 'audio/' + emotion + '/' + rand + '.mp3';
-    console.log(soundFile);
+    console.log('PLAY EMOTION', soundFile);
     var audio = new Audio(soundFile);
     if (emotion == 'ok3') {
       setBackground('confeti');
     }
     audio.play();
     audio.addEventListener('loadeddata', () => {
-      console.log('Terminó el audio');
+      console.log('PLAY EMOTION END');
       if (background === 'confeti') {
         setBackground('balls');
       }
@@ -158,20 +135,20 @@ export function App() {
   function speak(msgResp) {
     if (!msgResp) return;
 
-    console.log('SPEAK', msgResp);
+    console.log('SPEAK ' + msgResp.text, msgResp);
     if (msgResp.userId.slice(0, 3) !== 'bot') {
-      console.log('speak not a bot', msgResp.userId.slice(-3));
+      console.log('   speak not a bot', msgResp.userId.slice(-3));
       nextIndex();
       return;
     }
 
     if (msgResp.emotion) {
       /* Emotional sound */
-      console.log('emotion', msgResp.emotion);
       playEmotion(msgResp.emotion, () => {
-        console.log('nextIndex end playemotion');
         msgResp.emotion = null;
+        console.log('  callBack playEmotion()');
         speak(msgResp);
+        return;
       });
     } else {
       /* Speak */
@@ -194,21 +171,29 @@ export function App() {
 
           /* On End of speak */
           ssu.onend = function () {
-            console.log('nextIndex on end Speak');
+            console.log('  SPEAK nextIndex on end of: ' + msgResp.text);
             nextIndex();
           };
         } else {
-          console.error('ERROR Load mensage');
+          console.error('SPEAK ERROR Load mensage');
         }
       } else {
-        console.error({msgResp, voiceSpanish, voiceEnglish});
+        if (!msgResp.voice?.mute) {
+          console.log('SPEAK mute', {msgResp, voiceSpanish, voiceEnglish});
+        } else {
+          console.error('SPEAK ERROR', {msgResp, voiceSpanish, voiceEnglish});
+        }
+        nextIndex();
       }
     }
   }
 
   /* Processes User Response */
   async function processesUserResponse(userText) {
-    if (!chatId) return;
+    if (!chatId) {
+      console.error('chatId null!!');
+      return;
+    }
 
     scoreRef?.current?.resetTime();
     const resp = await apiPost('/chats/' + chatId + '/msgs', {
@@ -223,29 +208,44 @@ export function App() {
       msgsClone.push({text: userText, userId: user.id});
       for (const msgResp of resp.data) {
         const msg = msgResp;
+        /* Active timer? */
         if (msgResp.wordNumberTarget) {
+          setActiveTimer(true);
           setWordNumberTarget(msgResp.wordNumberTarget);
           setWordNumberOk(msgResp.wordNumberOk);
+        } else {
+          setActiveTimer(false);
+          setWordNumberTarget(0);
+          setWordNumberOk(0);
         }
 
         if (msgResp.emotionalResponse === 'ok') {
-          const nextCountOk = countOk + 1;
+          /* Response Ok */
+          const nextGlobalCountOk = globalCountOk + 1;
           msgsClone.push({
-            userId: 'botEnglish',
+            userId: msgResp.userId,
             text: userText,
           });
-          setCountOk(nextCountOk);
-          if (nextCountOk > 0 && nextCountOk % DIVISIBLE_TO_PRIZE === 0) {
+          setGlobalCountOk(nextGlobalCountOk);
+          if (
+            nextGlobalCountOk > 0 &&
+            nextGlobalCountOk % DIVISIBLE_TO_PRIZE === 0
+          ) {
+            /* Bonus */
             msg.userId = 'botPrize';
-            msg.prize = nextCountOk;
+            msg.prize = nextGlobalCountOk;
             msg.emotion = 'ok3';
           } else {
             msg.emotion = 'ok1';
           }
         } else if (msgResp.emotionalResponse === 'ko') {
+          /* Emotional Ko */
           msg.emotion = 'ko1';
+        } else {
+          /* No emotional! */
         }
 
+        /* Close session? */
         if (msgResp.command === 'session.close') {
           msgResp.commandFunc = commandSessionClose;
         }
@@ -258,11 +258,15 @@ export function App() {
     }
   }
 
+  /* commandSessionClose */
+  function commandSessionClose() {
+    setUser({});
+  }
+
   const endTime = new Date();
 
   var min = (endTime.getTime() - startTime.getTime()) / 1000 / 60;
-  const speed = countOk / min;
-
+  const speed = globalCountOk / min;
   // console.log({msgs});
 
   // Render ------------------------------------
@@ -283,7 +287,10 @@ export function App() {
         />
       ) : (
         <>
-          <Background count={countOk / DIVISIBLE_TO_PRIZE} type={background} />
+          <Background
+            count={globalCountOk / DIVISIBLE_TO_PRIZE}
+            type={background}
+          />
           <div id="board">
             <ChatMsgs
               msgs={msgs}
@@ -291,11 +298,10 @@ export function App() {
               voiceEnglish={voiceEnglish}
             />
             <Score
+              activeTimer={activeTimer}
               speed={speed}
-              countOk={countOk}
-              // time={timeUsed}
-              wordNumberTarget={wordNumberTarget}
               wordNumberOk={wordNumberOk}
+              wordNumberTarget={wordNumberTarget}
               endTimeEvent={() => {
                 processesUserResponse('?');
               }}

@@ -6,8 +6,8 @@ export const UserButton = ({
   //voiceSpanish, voiceEnglish
 }) => {
   return (
-    <div className="userButton" onClick={() => onClick()}>
+    <button className="userButton" onClick={() => onClick()}>
       {user.substring(0, 1).toUpperCase()}
-    </div>
+    </button>
   );
 };

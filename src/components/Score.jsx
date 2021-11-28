@@ -10,10 +10,10 @@ import {forwardRef, useEffect, useImperativeHandle, useState} from 'react';
 //   return Math.floor(new Date().getTime() / 1000);
 // }
 
-const DAILY_TARGET = 50;
+// const DAILY_TARGET = 50;
 const SECONDS_MAX = 30;
 export const Score = forwardRef(
-  ({speed, countOk, wordNumberTarget, wordNumberOk, endTimeEvent}, ref) => {
+  ({wordNumberTarget, wordNumberOk, endTimeEvent, activeTimer}, ref) => {
     const [time, setTime] = useState(0);
 
     useImperativeHandle(ref, () => ({
@@ -24,21 +24,25 @@ export const Score = forwardRef(
     }));
 
     useEffect(() => {
-      // const interval = setInterval(() => {
-      //   setTime(value => {
-      //     if (value > SECONDS_MAX) {
-      //       endTimeEvent();
-      //       return 0;
-      //     } else {
-      //       return value + 1;
-      //     }
-      //   });
-      // }, 500);
-      // return () => clearInterval(interval);
+      if (activeTimer) {
+        const interval = setInterval(() => {
+          setTime(value => {
+            if (value > SECONDS_MAX) {
+              endTimeEvent();
+              return 0;
+            } else {
+              return value + 1;
+            }
+          });
+        }, 500);
+        return () => clearInterval(interval);
+      } else {
+        setTime(0);
+      }
     });
 
-    const levelTargetArc = (Math.PI * wordNumberOk) / (wordNumberTarget / 2);
-    const dailyTargetArc = (Math.PI * countOk) / (DAILY_TARGET / 2);
+    const currentTargetArc = (Math.PI * wordNumberOk) / (wordNumberTarget / 2);
+    // const currentTargetArc = (Math.PI * countOk) / (DAILY_TARGET / 2);
     const timeArc = (Math.PI * time) / (SECONDS_MAX / 2);
 
     // console.log({
@@ -56,7 +60,7 @@ export const Score = forwardRef(
           yDomain={[-3, 3]}
           width={300}
           getAngle={d => d.time}
-          getAngle0={d => 0}
+          getAngle0={() => 0}
           height={300}
         >
           <ArcSeries
@@ -67,17 +71,17 @@ export const Score = forwardRef(
             radiusDomain={[0, 3]}
             data={[
               {
-                time: levelTargetArc,
+                time: currentTargetArc,
                 radius0: 1,
                 radius: 1.5,
                 color: 0,
               },
-              {
-                time: dailyTargetArc,
-                radius0: 2,
-                radius: 2.5,
-                color: 1,
-              },
+              // {
+              //   time: currentTargetArc,
+              //   radius0: 2,
+              //   radius: 2.5,
+              //   color: 1,
+              // },
               {
                 time: timeArc,
                 radius0: 3,
