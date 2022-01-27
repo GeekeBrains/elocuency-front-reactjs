@@ -11,7 +11,7 @@ import {forwardRef, useEffect, useImperativeHandle, useState} from 'react';
 // }
 
 // const DAILY_TARGET = 50;
-const SECONDS_MAX = 30;
+const SECONDS_MAX = 300;
 export const Score = forwardRef(
   ({wordNumberTarget, wordNumberOk, endTimeEvent, activeTimer}, ref) => {
     const [time, setTime] = useState(0);

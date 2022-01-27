@@ -8,6 +8,10 @@ export const ChatMsg = ({
   const style =
     'chatMsg chatMsg-' +
     (msg.userId?.substring(0, 3) === 'bot' ? 'bot' : 'user');
+
+  if (msg.hideText) {
+    msg.text = '🙈 ';
+  }
   return (
     <motion.div
       className={style}

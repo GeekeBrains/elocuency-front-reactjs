@@ -287,10 +287,10 @@ export function App() {
         />
       ) : (
         <>
-          <Background
+          {/* <Background
             count={globalCountOk / DIVISIBLE_TO_PRIZE}
             type={background}
-          />
+          /> */}
           <div id="board">
             <ChatMsgs
               msgs={msgs}
