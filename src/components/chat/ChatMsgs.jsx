@@ -3,12 +3,15 @@ import {ChatButton} from './ChatButton';
 import {ChatMarkdown} from './ChatMarkdown';
 import {ChatMsg} from './ChatMsg';
 import {ChatMsgPrize} from './ChatMsgPrize';
+import {ChatProgress} from './ChatProgress';
 
 export const ChatMsgs = ({
   //ref,
   msgs,
-  voiceSpanish,
-  voiceEnglish,
+  onAdd,
+  // voiceSpanish,
+  // voiceEnglish,
+  waiting,
 }) => {
   const chatMsgsRef = useRef();
 
@@ -32,6 +35,7 @@ export const ChatMsgs = ({
         height: 'fit-content',
         overflowY: 'auto',
       }}
+      disabled={waiting}
     >
       {msgs.map((msg, index) => {
         let msgComp = null;
@@ -43,19 +47,26 @@ export const ChatMsgs = ({
               <ChatMsg
                 key={'keyMsg' + index}
                 msg={msg}
-                voiceSpanish={voiceSpanish}
-                voiceEnglish={voiceEnglish}
+                // voiceSpanish={voiceSpanish}
+                // voiceEnglish={voiceEnglish}
               />
             );
           }
         } else if (msg.type === 'markdown') {
           msgComp = <ChatMarkdown key={'keyMsg' + index} text={msg.text} />;
         } else if (msg.type === 'button') {
-          msgComp = <ChatButton key={'keyMsg' + index} msg={msg} />;
+          msgComp = (
+            <ChatButton
+              key={'keyMsg' + index}
+              msg={msg}
+              onAdd={msg => onAdd(msg)}
+            />
+          );
+        } else if (msg.type === 'progress') {
+          msgComp = <ChatProgress key={'keyMsg' + index} msg={msg} />;
         } else {
           console.error('type no definido', msg);
         }
-
         return msgComp;
       })}
     </div>

@@ -109,7 +109,7 @@ body {
   margin-left: 24px;
   align-self: self-start;
   background-color: #6ecb35;
-  text-decoration: underline;
+  /* text-decoration: underline; */
   color: white;
   padding-right: 15px;
   padding-left: 15px;

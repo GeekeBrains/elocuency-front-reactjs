@@ -4,12 +4,18 @@ import {useEffect, useRef, useState} from 'react';
 import './App.css';
 import {ChatMsgs} from './components/chat/ChatMsgs';
 import {ChatInput} from 'components/chat/ChatInput';
-import {apiPost} from './libs/ApiCall';
+import {apiCall, apiPost} from './libs/ApiCall';
 import {Background} from 'components/common/Background';
 import {Login} from 'components/Login';
 import {Score} from 'components/Score';
+import ClipLoader from 'react-spinners/ClipLoader';
+import {ClimbingBoxLoader, PacmanLoader} from 'react-spinners';
 
 const DIVISIBLE_TO_PRIZE = 5;
+
+if (!global.elocuency) {
+  global.elocuency = {};
+}
 
 export function App() {
   const [user, setUser] = useState('');
@@ -25,15 +31,26 @@ export function App() {
 
   const [activeTimer, setActiveTimer] = useState(false);
   const [background, setBackground] = useState('balls');
-  const [voiceSpanish, setVoiceSpanish] = useState(null);
-  const [voiceEnglish, setVoiceEnglish] = useState(null);
+  const [waiting, setWaiting] = useState(false);
+
+  // const [voiceSpanish, setVoiceSpanish] = useState(null);
+  // const [voiceEnglish, setVoiceEnglish] = useState(null);
   // const [timeUsed, setTimeUsed] = useState(0);
 
   const scoreRef = useRef(null);
 
   /* Init App */
   useEffect(() => {
-    setChatId(localStorage.getItem('chatId') ?? '');
+    if (localStorage.getItem('chatId')) {
+      setChatId(localStorage.getItem('chatId') ?? '');
+    } else {
+      (async () => {
+        const resp = await apiPost('/chats', {});
+        console.log(resp);
+        setChatId(resp.data.id);
+        localStorage.setItem('chatId', resp.data.id);
+      })();
+    }
     setUser(JSON.parse(localStorage.getItem('user')) ?? {});
 
     /* Load voices */
@@ -42,10 +59,10 @@ export function App() {
       global.speechSynthesis.onvoiceschanged = function () {
         console.log('On onvoiceschanged');
         let vocesDisponibles = global.speechSynthesis.getVoices();
-        let defaultEs = '';
-        let googleEs = '';
-        let defaultEn = '';
-        let googleEn = '';
+        let defaultEs = null;
+        let googleEs = null;
+        let defaultEn = null;
+        let googleEn = null;
         vocesDisponibles.forEach(voz => {
           console.log('Voz: ', voz);
           if (voz.name === 'Google español') {
@@ -61,10 +78,10 @@ export function App() {
             defaultEn = voz;
           }
         });
-        setVoiceEnglish(googleEn ?? defaultEn);
-        setVoiceSpanish(googleEs ?? defaultEs);
-        console.log('en', googleEn ?? defaultEn);
-        console.log('es', googleEs ?? defaultEs);
+        global.elocuency.voiceEnglish = googleEn ?? defaultEn;
+        global.elocuency.voiceSpanish = googleEs ?? defaultEs;
+        console.log('en', global.elocuency.voiceEnglish);
+        console.log('es', global.elocuency.voiceSpanish);
       };
     } else {
       console.error('ERROR, onvoiceschanged no loaded');
@@ -152,17 +169,22 @@ export function App() {
       });
     } else {
       /* Speak */
-      if (msgResp && voiceSpanish && voiceEnglish && !msgResp.voice?.mute) {
+      if (
+        msgResp &&
+        global.elocuency.voiceSpanish &&
+        global.elocuency.voiceEnglish &&
+        !msgResp.voice?.mute
+      ) {
         let ssu = new global.SpeechSynthesisUtterance(msgResp.text);
         if (ssu) {
           if (
             msgResp.userId === 'botSpanish' ||
             msgResp.userId === 'botPrize'
           ) {
-            ssu.voice = voiceSpanish;
+            ssu.voice = global.elocuency.voiceSpanish;
             ssu.lang = 'es-ES';
           } else if (msgResp.userId === 'botEnglish') {
-            ssu.voice = voiceEnglish;
+            ssu.voice = global.elocuency.voiceEnglish;
             ssu.lang = 'en-GB';
           }
           ssu.rate = msgResp.voice?.rate || 1;
@@ -179,9 +201,9 @@ export function App() {
         }
       } else {
         if (!msgResp.voice?.mute) {
-          console.log('SPEAK mute', {msgResp, voiceSpanish, voiceEnglish});
+          console.log('SPEAK mute');
         } else {
-          console.error('SPEAK ERROR', {msgResp, voiceSpanish, voiceEnglish});
+          console.error('SPEAK ERROR');
         }
         nextIndex();
       }
@@ -194,6 +216,7 @@ export function App() {
       console.error('chatId null!!');
       return;
     }
+    setWaiting(true);
 
     scoreRef?.current?.resetTime();
     const resp = await apiPost('/chats/' + chatId + '/msgs', {
@@ -222,10 +245,6 @@ export function App() {
         if (msgResp.emotionalResponse === 'ok') {
           /* Response Ok */
           const nextGlobalCountOk = globalCountOk + 1;
-          msgsClone.push({
-            userId: msgResp.userId,
-            text: userText,
-          });
           setGlobalCountOk(nextGlobalCountOk);
           if (
             nextGlobalCountOk > 0 &&
@@ -255,6 +274,7 @@ export function App() {
 
       console.log('msgs', {msgs, msgsClone});
       setMsgsAux(msgsClone);
+      setWaiting(false);
     }
   }
 
@@ -292,10 +312,26 @@ export function App() {
             type={background}
           /> */}
           <div id="board">
+            {waiting ? (
+              <PacmanLoader
+                color={'#ffffff'}
+                loading={waiting}
+                css={{
+                  position: 'absolute',
+                  top: '50%',
+                  left: 'calc(50% - 75px)',
+                }}
+                size={50}
+              />
+            ) : (
+              <></>
+            )}
             <ChatMsgs
               msgs={msgs}
-              voiceSpanish={voiceSpanish}
-              voiceEnglish={voiceEnglish}
+              onAdd={text => processesUserResponse(text)}
+              waiting={waiting}
+              // voiceSpanish={voiceSpanish}
+              // voiceEnglish={voiceEnglish}
             />
             <Score
               activeTimer={activeTimer}
@@ -307,7 +343,6 @@ export function App() {
               }}
               ref={scoreRef}
             />
-
             <footer
               style={{
                 display: 'flex',
@@ -323,6 +358,7 @@ export function App() {
               <ChatInput
                 user={user.email}
                 onAdd={text => processesUserResponse(text)}
+                waiting={waiting}
               />
             </footer>
           </div>

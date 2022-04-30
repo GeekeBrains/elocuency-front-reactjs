@@ -1,7 +1,7 @@
 import {motion} from 'framer-motion';
 import React from 'react';
 
-export const ChatButton = ({msg}) => {
+export const ChatButton = ({msg, onAdd}) => {
   return (
     <motion.div
       className="chatButton"
@@ -14,7 +14,10 @@ export const ChatButton = ({msg}) => {
         duration: 1,
       }}
       onClick={() => {
-        msg?.commandFunc && msg.commandFunc();
+        console.log('onClick', msg.commandExec);
+        if (msg?.commandExec) {
+          onAdd('#' + msg.commandExec);
+        }
       }}
     >
       {msg.text}

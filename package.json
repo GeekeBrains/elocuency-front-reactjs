@@ -1,6 +1,6 @@
 {
-  "name": "wordzonia_chat",
-  "version": "0.1.0",
+  "name": "elocuency_front",
+  "version": "1.2.0",
   "private": true,
   "dependencies": {
     "@nivo/core": "^0.74.0",
@@ -17,6 +17,7 @@
     "react-gauge-chart": "^0.4.0",
     "react-markdown": "^7.1.0",
     "react-scripts": "4.0.3",
+    "react-spinners": "^0.11.0",
     "react-tsparticles": "^1.35.4",
     "react-vis": "^1.11.7",
     "start": "^5.1.0",

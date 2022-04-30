@@ -1,6 +1,6 @@
 import Axios from 'axios';
 
-const URL_BASE = 'http://localhost:3000';
+const URL_BASE = 'http:' + window.location.href.split(':')[1] + ':3000';
 
 Axios.interceptors.request.use(
   config => {

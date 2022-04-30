@@ -1,4 +1,4 @@
-import {UserButton} from 'components/chat/UserButton';
+import {UserButton} from 'components/UserButton';
 import {useState} from 'react';
 import {ChatMicSvg} from './ChatMicSvg';
 
@@ -11,7 +11,7 @@ try {
   console.error(e);
 }
 
-export const ChatInput = ({onAdd, user}) => {
+export const ChatInput = ({onAdd, user, waiting}) => {
   const [text, setText] = useState('');
 
   recognition.onerror = function (event) {
@@ -70,8 +70,10 @@ export const ChatInput = ({onAdd, user}) => {
       <UserButton
         user={user}
         onClick={() => {
-          console.log('click');
-          onAdd('!ver mis datos');
+          if (!waiting) {
+            console.log('click');
+            onAdd('!ver mis datos');
+          }
         }}
       />
       <input
@@ -84,8 +86,7 @@ export const ChatInput = ({onAdd, user}) => {
         }}
         value={text}
         onKeyPress={key => {
-          // console.log({ key });
-          if (key.code === 'Enter') {
+          if (!waiting && key.code === 'Enter') {
             onAdd(text);
             setText('');
           }

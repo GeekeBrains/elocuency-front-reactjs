@@ -1,6 +1,6 @@
 // import GaugeChart from 'react-gauge-chart';
 
-import {XYPlot, ArcSeries} from 'react-vis';
+import {XYPlot, ArcSeries, LineSeries} from 'react-vis';
 
 // import {EXTENDED_DISCRETE_COLOR_RANGE} from 'theme';
 
@@ -92,6 +92,7 @@ export const Score = forwardRef(
             colorRange={['#ffffff5e', '#3c52f340']}
           />
         </XYPlot>
+
         {/* {countOk}/{wordNumberOk}/{wordNumberTarget}
         <br></br>
         {countOk}/{DAILY_TARGET}
